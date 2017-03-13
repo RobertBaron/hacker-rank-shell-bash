@@ -3,20 +3,17 @@
 _ROWS=63
 _COLS=100
 
-iterations=$1
+iterations=1
 dots=""
+read N
+
 declare -a grid
-    # Check argument supplied
-#    if [ $# -eq 0 ] then
-#        draw=0
-#    else
-#        draw=$1
-#    fi
 
 function getIndex {
  xval=$1
  yval=$2
- local  myresult=$(( (xval*100) + yval ))
+ myresult=0
+ let  myresult=xval*100+yval
  echo "$myresult"
 }
 
@@ -34,11 +31,12 @@ function addArt {
     aux=$startingRow
     dotsParam=$4
 
-    while [ $startingRow -gt $((aux - size)) ]
+    let whileAux=aux-size
+    while [ $startingRow -gt $whileAux ]
     do
-       index=$(getIndex startingRow center)
+       index=$(getIndex $startingRow $center)
        centerDots="$centerDots $index "
-       startingRow=$((startingRow-1))
+       let startingRow=startingRow-1
     done
     aux=$startingRow
     read right rightIndexes < <(getLegIndexes $startingRow $center $size 0)
@@ -47,10 +45,10 @@ function addArt {
     dots="$centerDots $rightIndexes $leftIndexes $dotsParam "
     subDotsR=""
     subDotsL=""
-    if [ $size -gt 0 ]; then
-        nextRow=$((startingRow-(size)))
-        size=$((size/2))
-
+    if [ "$iterations" -lt "$N" ]; then
+        let nextRow=startingRow-size
+        let size=size/2
+        let iterations=iterations+1
         read subDotsR < <(addArt $size $right $nextRow $dots)
         read subDotsL < <(addArt $size $left $nextRow $dots)
     fi
@@ -64,17 +62,18 @@ function getLegIndexes {
     direction=$4
 
     aux=$row
-    while [ $row -gt $((aux - size)) ]
+    let useRows=aux-size
+    while [ $row -gt $useRows ]
     do
        if [  -z ${direction} ] ; then
-        col=$((col-1))
+        let col=col-1
        else
-        col=$((col+1))
+        let col=col+1
        fi
-       index=$(getIndex row col)
-       #grid[index]=$iteration
+       index=$(getIndex $row $col)
+
        indexes="$indexes $index "
-       row=$((row-1))
+       let row=row-1
     done
 
     echo "$col $indexes"
@@ -82,19 +81,20 @@ function getLegIndexes {
 
 function initGrid {
     x=$_ROWS
-    while [ $x -ge 0 ]
+    while [ $x -gt 0 ]
     do
        # y
        i=0
        y=$_COLS
        while [ $y -gt 0 ]
        do
-           index=$(getIndex x y)
+           index=$(getIndex $x $y)
            grid[index]="_"
-           y=$((y-1))
+
+           let y=y-1
        done
        # x
-       x=$((x-1))
+       let x=x-1
     done
 
 }
@@ -103,34 +103,34 @@ function printGrid {
     x=$_ROWS
     x2=0
     result=[]
-    while [ $x -ge 0 ]
+    while [ $x -gt 0 ]
     do
         # y
         y=$_COLS
         row=""
         while [ $y -gt 0 ]
         do
-            index=$(getIndex x y)
+            index=$(getIndex $x $y)
             row="${row}${grid[index]}"
-            y=$((y-1))
+            let y=y-1
         done
         # x
         result[x2]=$row
-        x=$((x-1))
-        x2=$((x2+1))
+        let x=x-1
+        let x2=x2+1
     done
 
-    x=$_ROWS
+    let x=_ROWS-1
     while [ $x -ge 0 ]
     do
         echo ${result[x]}
-        x=$((x-1))
+        let x=x-1
     done
 }
 
 initGrid
-read res < <(addArt 16 $((_COLS/2)) $_ROWS $dots)
-
+let center=_COLS/2+1
+read res < <(addArt 16 $center $_ROWS $dots)
 addDots $res
 
 printGrid
