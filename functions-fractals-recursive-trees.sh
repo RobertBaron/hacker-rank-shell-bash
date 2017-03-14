@@ -5,8 +5,8 @@ _COLS=100
 
 iterations=1
 dots=""
-read N
-
+#read N
+N=5
 declare -a grid
 
 function getIndex {
@@ -34,7 +34,8 @@ function addArt {
     let whileAux=aux-size
     while [ $startingRow -gt $whileAux ]
     do
-       index=$(getIndex $startingRow $center)
+       #index=$(getIndex $startingRow $center)
+       let index=startingRow*100+center
        centerDots="$centerDots $index "
        let startingRow=startingRow-1
     done
@@ -70,8 +71,8 @@ function getLegIndexes {
        else
         let col=col+1
        fi
-       index=$(getIndex $row $col)
-
+       #index=$(getIndex $row $col)
+       let index=row*100+col
        indexes="$indexes $index "
        let row=row-1
     done
@@ -88,7 +89,8 @@ function initGrid {
        y=$_COLS
        while [ $y -gt 0 ]
        do
-           index=$(getIndex $x $y)
+           #index=$(getIndex $x $y)
+           let index=x*100+y
            grid[index]="_"
 
            let y=y-1
@@ -110,7 +112,8 @@ function printGrid {
         row=""
         while [ $y -gt 0 ]
         do
-            index=$(getIndex $x $y)
+            #index=$(getIndex $x $y)
+            let index=x*100+y
             row="${row}${grid[index]}"
             let y=y-1
         done
